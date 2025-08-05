@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Order</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 1em;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1em;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        h2 {
+            text-align: center;
+        }
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 1em;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        .filter-item input[type="checkbox"] {
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+            margin-top: 1em;
+            background-color: #ffffff;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #e9ecef;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            background-color: #ffffff;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .action-button {
+            display: inline-block;
+            padding: 10px 12px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        .action-button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 1em;
+        }
+        .submit-button {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .submit-button:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            border-color: #6c757d;
+        }
+        .back-button:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        .download-button {
+            background-color: #17a2b8;
+            color: white;
+            border-color: #17a2b8;
+        }
+        .download-button:hover {
+            background-color: #138496;
+            border-color: #117a8b;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Create New Order</h1>
+        
+        <div class="filter-container">
+            {% for category in categories %}
+                <label class="filter-item">
+                    <input type="checkbox" name="category-filter" value="{{ category }}">
+                    <span>{{ category }}</span>
+                </label>
+            {% endfor %}
+        </div>
+
+        <form action="{{ url_for('submit_order') }}" method="post">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th>Item Name</th>
+                            <th>Current Quantity</th>
+                            <th>Unit</th>
+                            <th>Order Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr class="item-row" data-item-id="{{ item.id }}" data-item-name="{{ item.name }}" data-item-quantity="{{ item.quantity }}" data-item-unit="{{ item.unit }}" data-item-category="{{ item.category }}">
+                            <td><input type="checkbox" class="item-checkbox" name="select-item" value="{{ item.id }}"></td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.unit }}</td>
+                            <td><input type="number" name="order_{{ item.id }}" min="0" value="0"></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="action-button-group">
+                <button type="submit" class="action-button submit-button">Submit Order</button>
+                <button type="button" id="download-button" class="action-button download-button">Download Selected List</button>
+                <a href="{{ url_for('index') }}" class="action-button back-button">Go Back to Inventory</a>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        const selectAllCheckbox = document.getElementById('select-all');
+        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+        const downloadButton = document.getElementById('download-button');
+        const categoryCheckboxes = document.querySelectorAll('input[name="category-filter"]');
+        const allItems = document.querySelectorAll('.item-row');
+
+        // Function to handle "Select All" checkbox
+        selectAllCheckbox.addEventListener('change', () => {
+            const visibleItems = Array.from(allItems).filter(row => row.style.display !== 'none');
+            visibleItems.forEach(row => {
+                const checkbox = row.querySelector('.item-checkbox');
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        });
+
+        // Function to filter items based on category checkboxes
+        function filterItems() {
+            const checkedCategories = Array.from(categoryCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+            
+            if (checkedCategories.length === 0 || checkedCategories.includes('All')) {
+                allItems.forEach(row => row.style.display = '');
+            } else {
+                allItems.forEach(row => {
+                    const itemCategory = row.dataset.category;
+                    if (checkedCategories.includes(itemCategory)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // Event listeners for category filters
+        categoryCheckboxes.forEach(checkbox => {
+            if (checkbox.value === 'All') {
+                checkbox.checked = true;
+            }
+            checkbox.addEventListener('change', () => {
+                if (checkbox.value === 'All' && checkbox.checked) {
+                    categoryCheckboxes.forEach(cb => cb.checked = cb.value === 'All');
+                } else if (checkbox.checked) {
+                    const allCheckbox = document.querySelector('input[value="All"]');
+                    if (allCheckbox) allCheckbox.checked = false;
+                }
+                filterItems();
+            });
+        });
+
+        // Function to handle download button click
+        downloadButton.addEventListener('click', () => {
+            const checkedItems = Array.from(itemCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.closest('tr'));
+
+            if (checkedItems.length === 0) {
+                alert('Please select at least one item to download.');
+                return;
+            }
+
+            // Create CSV header
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Item Name,Current Quantity,Unit,Order Quantity\n";
+
+            // Add selected item data to CSV content
+            checkedItems.forEach(row => {
+                const name = row.dataset.itemName;
+                const currentQuantity = row.dataset.itemQuantity;
+                const unit = row.dataset.itemUnit;
+                const orderQuantity = row.querySelector('input[type="number"]').value;
+                csvContent += `${name},${currentQuantity},${unit},${orderQuantity}\n`;
+            });
+
+            // Create a temporary link and trigger download
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "selected_order_list.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+        
+        // Initial filter on page load
+        filterItems();
+    </script>
+</body>
+</html>

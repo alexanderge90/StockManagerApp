@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 1em; /* Reduced margin for smaller screens */
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        main {
+             max-width: 900px;
+            margin: 0 auto;
+            padding: 1em;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+           
+        }
+        p {
+            line-height: 1.6;
+            text-align: justify;
+        }
+        
+        .action-button {
+            display: inline-block;
+            padding: 10px 12px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 16px; 
+            margin-top: 2em;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .edit-button {
+            background-color: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        .edit-button:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>About This Application</h1>
+        <p>
+            This is a simple inventory management application built with Flask, a Python web framework. It uses SQLite as a database to store inventory items, which can be viewed, added, edited, and deleted.
+        </p>
+        <p>
+            The interface is designed to be fully responsive, working on both desktop and mobile devices. You can organize your inventory using categories and export the full data as a CSV file for use in spreadsheet applications like Excel.
+        </p>
+        <a href="{{ url_for('index') }}" class="action-button edit-button">Go Back to Inventory</a>
+    </main>
+</body>
+</html>

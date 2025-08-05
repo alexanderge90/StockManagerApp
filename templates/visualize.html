@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory CSV Visualization</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            margin: 1em; 
+        }
+        h1 {
+            text-align: center;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 1em;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+
+        /* Button styles from index.html */
+        .action-button {
+            display: block; /* Stack buttons on top of each other */
+            padding: 10px 12px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 10px; /* Space between buttons */
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .download-button {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .download-button:hover {
+            background-color: #0056b3;
+            border-color: #004d9e;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            border-color: #6c757d;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+        /* Media query for larger screens to make buttons inline */
+        @media (min-width: 600px) {
+            .action-button {
+                display: inline-block;
+                width: auto;
+            }
+            .button-group {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>DRS 25</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>LOC</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.unit }}</td>
+                <td>{{ item.location }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="button-group">
+        <a href="{{ url_for('download_csv') }}" class="action-button download-button">Download CSV</a>
+        <a href="{{ url_for('index') }}" class="action-button back-button">Go back to main page</a>
+    </div>
+</body>
+</html>
