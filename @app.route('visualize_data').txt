@@ -1,7 +1,0 @@
-@app.route('/visualize_data')
-def visualize_data():
-    """Renders a page to visualize all inventory data."""
-    conn = get_db_connection()
-    items = conn.execute('SELECT * FROM items').fetchall()
-    conn.close()
-    return render_template('visualize.html', items=items)
