@@ -105,23 +105,6 @@ def delete_item(item_id):
     conn.close()
     return redirect(url_for('index'))
 
-@app.route('/visualize_data')
-def visualize_data():
-    """Generates a CSV string and renders a page to visualize it."""
-    conn = get_db_connection()
-    items = conn.execute('SELECT * FROM items').fetchall()
-    conn.close()
-
-    # csv_buffer = io.StringIO()
-    # writer = csv.writer(csv_buffer)
-    # writer.writerow(['ID', 'Name', 'Quantity', 'Unit', 'Category'])
-    # for item in items:
-    #     writer.writerow([item['id'], item['name'], item['quantity'], item['unit'], item['category']])
-
-    # csv_data = csv_buffer.getvalue()
-    
-    return render_template('visualize.html', items=items)
-
 @app.route('/download_csv')
 def download_csv():
     """Generates a CSV file for download."""
@@ -131,7 +114,7 @@ def download_csv():
 
     csv_buffer = io.StringIO()
     writer = csv.writer(csv_buffer)
-    writer.writerow(['ID', 'Name', 'Quantity', 'Unit', 'Category', 'Location'])
+    writer.writerow(['ID', 'Name', 'Quantity', 'Unit', 'Category'])
     for item in items:
         writer.writerow([item['id'], item['name'], item['quantity'], item['unit'], item['category'], item['location']])
     
@@ -151,7 +134,7 @@ def info():
 def order_list():
     """Renders the order list page with all inventory items.
     
-    The filtering and download logic for the order list is now handled 
+    The filtering and download logic for this page is handled 
     by JavaScript on the client side in order.html.
     """
     conn = get_db_connection()
@@ -159,27 +142,7 @@ def order_list():
     conn.close()
     return render_template('order.html', items=items, categories=CATEGORIES)
 
-@app.route('/submit_order', methods=['POST'])
-def submit_order():
-    """Handles the submitted order form."""
-    ordered_items = {}
-    for key, value in request.form.items():
-        if key.startswith('order_') and value and int(value) > 0:
-            item_id = key.split('_')[1]
-            ordered_items[item_id] = value
-    
-    if ordered_items:
-        message = "Order submitted for the following items: "
-        for item_id, quantity in ordered_items.items():
-            conn = get_db_connection()
-            item = conn.execute('SELECT name, unit FROM items WHERE id = ?', (item_id,)).fetchone()
-            conn.close()
-            message += f"{item['name']} ({quantity} {item['unit']}), "
-        flash(message.rstrip(', '), 'success')
-    else:
-        flash("No items were ordered.", 'error')
-    
-    return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")

@@ -47,6 +47,17 @@
             transform: scale(1.2);
             cursor: pointer;
         }
+        .search-container {
+            margin-bottom: 1em;
+            text-align: center;
+        }
+        .search-container input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -54,7 +65,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            min-width: 700px; /* Increased min-width to accommodate new column */
             margin-top: 1em;
             background-color: #ffffff;
         }
@@ -94,12 +105,12 @@
             gap: 10px;
             margin-top: 1em;
         }
-        .submit-button {
+        .submit-button { /* This style is unused as per request */
             background-color: #007bff;
             color: white;
             border-color: #007bff;
         }
-        .submit-button:hover {
+        .submit-button:hover { /* This style is unused as per request */
             background-color: #0069d9;
             border-color: #0062cc;
         }
@@ -125,7 +136,7 @@
 </head>
 <body>
     <main>
-        <h1>Create New Order</h1>
+        <h1>Order</h1>
         
         <div class="filter-container">
             {% for category in categories %}
@@ -136,7 +147,11 @@
             {% endfor %}
         </div>
 
-        <form action="{{ url_for('submit_order') }}" method="post">
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search items...">
+        </div>
+
+        <form> <!-- Form without action as submit is removed -->
             <div class="table-container">
                 <table>
                     <thead>
@@ -145,16 +160,20 @@
                             <th>Item Name</th>
                             <th>Current Quantity</th>
                             <th>Unit</th>
+                            <th>Category</th>
+                            <th>Location</th> <!-- New column header -->
                             <th>Order Quantity</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in items %}
-                        <tr class="item-row" data-item-id="{{ item.id }}" data-item-name="{{ item.name }}" data-item-quantity="{{ item.quantity }}" data-item-unit="{{ item.unit }}" data-item-category="{{ item.category }}">
+                        <tr class="item-row" data-item-id="{{ item.id }}" data-item-name="{{ item.name }}" data-item-quantity="{{ item.quantity }}" data-item-unit="{{ item.unit }}" data-item-category="{{ item.category }}" data-item-location="{{ item.location }}">
                             <td><input type="checkbox" class="item-checkbox" name="select-item" value="{{ item.id }}"></td>
                             <td>{{ item.name }}</td>
                             <td>{{ item.quantity }}</td>
                             <td>{{ item.unit }}</td>
+                            <td>{{ item.category }}</td><!-- Display item category -->
+                            <td>{{ item.location }}</td> 
                             <td><input type="number" name="order_{{ item.id }}" min="0" value="0"></td>
                         </tr>
                         {% endfor %}
@@ -163,7 +182,6 @@
             </div>
 
             <div class="action-button-group">
-                <button type="submit" class="action-button submit-button">Submit Order</button>
                 <button type="button" id="download-button" class="action-button download-button">Download Selected List</button>
                 <a href="{{ url_for('index') }}" class="action-button back-button">Go Back to Inventory</a>
             </div>
@@ -176,6 +194,7 @@
         const downloadButton = document.getElementById('download-button');
         const categoryCheckboxes = document.querySelectorAll('input[name="category-filter"]');
         const allItems = document.querySelectorAll('.item-row');
+        const searchInput = document.getElementById('search-input');
 
         // Function to handle "Select All" checkbox
         selectAllCheckbox.addEventListener('change', () => {
@@ -186,41 +205,69 @@
             });
         });
 
-        // Function to filter items based on category checkboxes
+        // Function to filter items based on category checkboxes and search input
         function filterItems() {
             const checkedCategories = Array.from(categoryCheckboxes)
                 .filter(checkbox => checkbox.checked)
                 .map(checkbox => checkbox.value);
-            
-            if (checkedCategories.length === 0 || checkedCategories.includes('All')) {
-                allItems.forEach(row => row.style.display = '');
-            } else {
-                allItems.forEach(row => {
-                    const itemCategory = row.dataset.category;
-                    if (checkedCategories.includes(itemCategory)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            }
+
+            // If "All" is checked, or no specific categories are checked, treat as "All"
+            const effectiveCategories = (checkedCategories.length === 0 || checkedCategories.includes('All'))
+                ? Array.from(categoryCheckboxes).map(cb => cb.value).filter(val => val !== 'All') // Include all actual categories
+                : checkedCategories;
+
+            const searchTerm = searchInput.value.toLowerCase();
+
+            allItems.forEach(row => {
+                const itemLocation = row.dataset.itemLocation.toLowerCase();
+                const itemCategory = row.dataset.itemCategory;
+                const itemName = row.dataset.itemName.toLowerCase();
+                const itemQuantity = row.dataset.itemQuantity.toLowerCase();
+                const itemUnit = row.dataset.itemUnit.toLowerCase();
+
+                const matchesCategory = effectiveCategories.includes(itemCategory);
+                const matchesSearch = (
+                    itemName.includes(searchTerm) ||
+                    itemQuantity.includes(searchTerm) ||
+                    itemUnit.includes(searchTerm) ||
+                    itemCategory.includes(searchTerm)||
+                    itemLocation.includes(searchTerm)
+                );
+
+                if (matchesCategory && matchesSearch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
 
         // Event listeners for category filters
         categoryCheckboxes.forEach(checkbox => {
             if (checkbox.value === 'All') {
-                checkbox.checked = true;
+                checkbox.checked = true; // "All" is checked by default
             }
             checkbox.addEventListener('change', () => {
                 if (checkbox.value === 'All' && checkbox.checked) {
-                    categoryCheckboxes.forEach(cb => cb.checked = cb.value === 'All');
-                } else if (checkbox.checked) {
+                    // If "All" is checked, uncheck others
+                    categoryCheckboxes.forEach(cb => {
+                        if (cb.value !== 'All') cb.checked = false;
+                    });
+                } else if (checkbox.value !== 'All' && checkbox.checked) {
+                    // If any other category is checked, uncheck "All"
                     const allCheckbox = document.querySelector('input[value="All"]');
                     if (allCheckbox) allCheckbox.checked = false;
+                } else if (!checkbox.checked && Array.from(categoryCheckboxes).filter(cb => cb.checked && cb.value !== 'All').length === 0) {
+                    // If no categories are checked, check "All"
+                    const allCheckbox = document.querySelector('input[value="All"]');
+                    if (allCheckbox) allCheckbox.checked = true;
                 }
                 filterItems();
             });
         });
+
+        // Event listener for search input
+        searchInput.addEventListener('keyup', filterItems);
 
         // Function to handle download button click
         downloadButton.addEventListener('click', () => {
@@ -235,15 +282,17 @@
 
             // Create CSV header
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Item Name,Current Quantity,Unit,Order Quantity\n";
+            csvContent += "Item Name,Current Quantity,Unit,Category,Order Quantity\n"; // Added Category to header
 
             // Add selected item data to CSV content
             checkedItems.forEach(row => {
                 const name = row.dataset.itemName;
                 const currentQuantity = row.dataset.itemQuantity;
                 const unit = row.dataset.itemUnit;
-                const orderQuantity = row.querySelector('input[type="number"]').value;
-                csvContent += `${name},${currentQuantity},${unit},${orderQuantity}\n`;
+                const category = row.dataset.itemCategory; // Get category data
+                const location = row.dataset.itemLocation;
+                const orderQuantity = row.querySelector('input[name^="order_"]').value;
+                csvContent += `${name},${currentQuantity},${unit},${category},${orderQuantity}\n`; // Added Category to row data
             });
 
             // Create a temporary link and trigger download
@@ -255,7 +304,7 @@
             link.click();
             document.body.removeChild(link);
         });
-        
+
         // Initial filter on page load
         filterItems();
     </script>
