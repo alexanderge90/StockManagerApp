@@ -114,6 +114,15 @@
             background-color: #c82333;
             border-color: #bd2130;
         }
+        .order-button{
+            background-color: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        .order-button:hover{
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
 
         /* Tab bar styling */
         .tab-bar {
@@ -210,7 +219,6 @@
                 </tbody>
             </table>
         </div>
-
         <hr>
         
         <a href="{{ url_for('info') }}" class="action-button edit-button" style="margin-bottom: 1em;">Info Page</a>
@@ -229,7 +237,7 @@
                 <option value="SMALL">SMALL</option>
                 <option value="BAK">BAK</option>
                 <option value="BOX">BOX</option>
-                <option value="TRAY">TRAY</option>
+                <option value="TRAYS">TRAYS</option>
             </select>
             <label for="category">Category:</label>
             <select id="category" name="category" required>
