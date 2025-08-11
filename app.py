@@ -9,7 +9,7 @@ app.secret_key = 'your_secret_key_here' # You need to set a secret key for flash
 
 # Define the list 
 CATEGORIES = ['All', 'Food', 'Soda', 'Liquor', 'Wine', 'Beer']
-LOCATIONS = ['Inside', 'Soda Container','Beer container', 'Headliner/wine container', 'Kathy']
+LOCATIONS = ['Inside', 'Soda Container','Beer container', 'Headliner/wine container', 'Sea container', 'Kathy']
 
 def get_db_connection():
     """Establishes a connection to the SQLite database."""
