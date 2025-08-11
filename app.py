@@ -7,8 +7,9 @@ app = Flask(__name__)
 DATABASE = 'DRS25.db'
 app.secret_key = 'your_secret_key_here' # You need to set a secret key for flash messages
 
-# Define the list of categories here
+# Define the list 
 CATEGORIES = ['All', 'Food', 'Soda', 'Liquor', 'Wine', 'Beer']
+LOCATIONS = ['Inside', 'Soda Container','Beer container', 'Headliner/wine container', 'Kathy']
 
 def get_db_connection():
     """Establishes a connection to the SQLite database."""
@@ -41,7 +42,7 @@ def index():
     conn = get_db_connection()
     items = conn.execute('SELECT * FROM items').fetchall()
     conn.close()
-    return render_template('index.html', items=items, categories=CATEGORIES, current_category='All')
+    return render_template('index.html', items=items, categories=CATEGORIES, locations=LOCATIONS, current_category='All')
 
 @app.route('/category/<string:category_name>')
 def category_view(category_name):
@@ -75,7 +76,7 @@ def edit_item(item_id):
     conn = get_db_connection()
     item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
     conn.close()
-    return render_template('edit.html', item=item, categories=CATEGORIES)
+    return render_template('edit.html', item=item, categories=CATEGORIES, locations=LOCATIONS)
 
 @app.route('/update_item/<int:item_id>', methods=['POST'])
 def update_item(item_id):
@@ -140,7 +141,7 @@ def order_list():
     conn = get_db_connection()
     items = conn.execute('SELECT * FROM items').fetchall()
     conn.close()
-    return render_template('order.html', items=items, categories=CATEGORIES)
+    return render_template('order.html', items=items, categories=CATEGORIES, locations=LOCATIONS)
 
 
 

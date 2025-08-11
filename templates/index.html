@@ -249,10 +249,9 @@
             </select>
             <label for="location">Location:</label>
             <select id="location" name="location" required>
-                <option value="Inside">Inside</option>
-                <option value="Container 1">Container 1</option>
-                <option value="Container 2">Container 2</option>
-                <option value="Kathy">Kathy</option>
+                {% for location in locations %}
+                     <option value="{{ location }}">{{ location }}</option>                    
+                {% endfor %}
             </select>
             <button type="submit">Add Item</button>
         </form>

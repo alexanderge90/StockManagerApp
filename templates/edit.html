@@ -95,10 +95,9 @@
         </select>
         <label for="location">Location:</label>
         <select id="location" name="location" required>
-            <option value="Inside" {% if item.location == 'Inside' %}selected{% endif %}>Inside</option>
-            <option value="Contianer 1" {% if item.location == 'Contianer 1' %}selected{% endif %}>Contianer 1</option>
-            <option value="Contianer 2" {% if item.location == 'Contianer 2' %}selected{% endif %}>Contianer 2</option>
-            <option value="Kathy" {% if item.location == 'Kathy' %}selected{% endif %}>Kathy</option>
+            {% for location in locations %}
+                <option value="{{ location }}" {% if item.location == location %}selected{% endif %}>{{ location }}</option>
+            {% endfor %}        
         </select>
         <div class="button-group">
             <button type="submit" class="action-button edit-button">Update Item</button>
